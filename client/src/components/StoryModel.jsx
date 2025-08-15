@@ -64,7 +64,7 @@ const StoryModel = ({ setShowModel, fetchStories }) => {
 						/>
 					))}
 				</div>
-				<div className="flex mt-4 gap-2">
+				<div className="flex w-full mt-4 gap-2">
 					<button
 						onClick={() => {
 							setMode("text");
@@ -88,6 +88,7 @@ const StoryModel = ({ setShowModel, fetchStories }) => {
 							}}
 							type="file"
 							accept="image/*, video/*"
+							className="hidden"
 						/>
 						<Upload size={18} /> Photo/Video
 					</label>
