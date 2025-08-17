@@ -2,9 +2,11 @@ import { BadgeCheck, Heart, MessageCircle, Share2 } from "lucide-react";
 import moment from "moment";
 import React from "react";
 import { dummyUserData } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 
 const PostCart = ({ post }) => {
-	console.log(post);
+	// console.log(post);
+    const navigate = useNavigate();
 	const postWithHashtags = post.content.replace(
 		/#(\w+)/g,
 		'<span class="text-indigo-600">#$1</span>'
@@ -16,7 +18,7 @@ const PostCart = ({ post }) => {
 	return (
 		<div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
 			{/* user info */}
-			<div className="inline-flex items-center gap-3 cursor-pointer">
+			<div onClick={() => navigate(`/profile/${post.user._id}`)} className="inline-flex items-center gap-3 cursor-pointer">
 				<img
 					src={post.user.profile_picture}
 					className="w-10 h-10 rounded-full object-cover shadow"
