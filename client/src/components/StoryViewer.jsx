@@ -76,7 +76,7 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 			{/* progress bar */}
 			<div className="absolute top-0 left-0 w-full h-1 bg-gray-700">
 				<div
-					className="h-full bg-white transition-[width]"
+					className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-[width]"
 					style={{
 						width: `${progress}%`,
 						// Smooth linear animation for non-video stories

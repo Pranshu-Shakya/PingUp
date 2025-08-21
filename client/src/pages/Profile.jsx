@@ -5,6 +5,7 @@ import Loading from '../components/Loading'
 import UserProfileInfo from '../components/UserProfileInfo';
 import PostCard from '../components/PostCart'
 import moment from 'moment';
+import ProfileModal from '../components/ProfileModal';
 
 const Profile = () => {
     const {profileId} = useParams();
@@ -46,7 +47,7 @@ const Profile = () => {
                         activeTab === "posts" && (
                             <div className='mt-6 flex flex-col items-center gap-6'>
                                 {
-                                    posts.map((post) => (<PostCard key={post.id} post={post} />))
+                                    posts.map((post) => (<PostCard key={post._id} post={post} />))
                                 }
                             </div>
                         )
@@ -73,7 +74,7 @@ const Profile = () => {
                 </div>
             </div>
             {/* edit profile modal */}
-            {showEdit && <p>show profile edit</p>}
+            {showEdit && <ProfileModal setShowEdit={setShowEdit} />}
         </div>
     ) : (<Loading />)
 }
