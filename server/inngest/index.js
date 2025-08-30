@@ -6,7 +6,26 @@ import Story from "../models/story.model.js";
 import Message from "../models/message.model.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "pingup-app" });
+// Ensure INNGEST_EVENT_KEY and INNGEST_SIGNING_KEY are set in your environment for cloud usage.
+export const inngest = new Inngest({
+	id: "pingup-app",
+	eventKey: process.env.INNGEST_EVENT_KEY, // required to send events to Inngest Cloud
+	signingKey: process.env.INNGEST_SIGNING_KEY, // used to verify function calls
+});
+
+if (!process.env.INNGEST_EVENT_KEY) {
+	console.warn("[Inngest] Missing INNGEST_EVENT_KEY; event sending will fail with 401.");
+}
+
+// Optional: centralized safe send wrapper
+export async function sendInngestEvent(name, data) {
+	try {
+		return await inngest.send({ name, data });
+	} catch (err) {
+		console.error(`[Inngest] Failed to send event '${name}':`, err?.response?.data || err.message);
+		throw err;
+	}
+}
 
 //inngest function to save user data to a database
 const syncUserCreation = inngest.createFunction(

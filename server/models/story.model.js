@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const storySchema = new mongoose.Schema(
 	{
 		user: {
-			type: mongoose.Schema.Types.ObjectId,
+			type: String, // User _id is a Clerk string ID
 			ref: "User",
 			required: true,
 		},
@@ -19,7 +19,7 @@ const storySchema = new mongoose.Schema(
 		},
 		views_count: [
 			{
-				type: mongoose.Schema.Types.ObjectId,
+				type: String, // align with User._id type
 				ref: "User",
 			},
 		],

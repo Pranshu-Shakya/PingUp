@@ -3,22 +3,49 @@ import moment from "moment";
 import React from "react";
 import { dummyUserData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
-const PostCart = ({ post }) => {
+const PostCard = ({ post }) => {
 	// console.log(post);
-    const navigate = useNavigate();
+	const navigate = useNavigate();
+	const { getToken } = useAuth();
 	const postWithHashtags = post.content.replace(
 		/#(\w+)/g,
 		'<span class="text-indigo-600">#$1</span>'
 	);
 	const [likes, setLikes] = React.useState(post.likes_count);
-	const currentUser = dummyUserData;
+	const currentUser = useSelector((state) => state.user.value);
 	// console.log(currentUser);
-	const handleLike = async () => {};
+    
+	const handleLike = async () => {
+        try {
+            const {data} = await api.post("/api/post/like", {postId :post._id}, {headers: {Authorization: `Bearer ${await getToken()}`}});
+            if(data.success) {
+                // toast.success(data.message)
+                setLikes(prev => {
+                    if(prev.includes(currentUser._id)) {
+                        return prev.filter(id => id !== currentUser._id);
+                    } else {
+                        return [...prev, currentUser._id];
+                    }
+                })
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
+    };
 	return (
 		<div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
 			{/* user info */}
-			<div onClick={() => navigate(`/profile/${post.user._id}`)} className="inline-flex items-center gap-3 cursor-pointer">
+			<div
+				onClick={() => navigate(`/profile/${post.user._id}`)}
+				className="inline-flex items-center gap-3 cursor-pointer"
+			>
 				<img
 					src={post.user.profile_picture}
 					className="w-10 h-10 rounded-full object-cover shadow"
@@ -78,4 +105,4 @@ const PostCart = ({ post }) => {
 	);
 };
 
-export default PostCart;
+export default PostCard;
