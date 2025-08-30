@@ -30,13 +30,15 @@ const userSlice = createSlice({
 	name: "user",
 	initialState,
 	reducers: {},
-    extraReducers: (builder) => {
-        builder.addCase(fetchUser.fulfilled, (state, action) => {
-            state.value = action.payload;
-        }).addCase(updateUser.fulfilled, (state, action) => {
-            state.value = action.payload;
-        });
-    }
+	extraReducers: (builder) => {
+		builder
+			.addCase(fetchUser.fulfilled, (state, action) => {
+				state.value = action.payload;
+			})
+			.addCase(updateUser.fulfilled, (state, action) => {
+				state.value = action.payload;
+			});
+	},
 });
 
 export default userSlice.reducer;

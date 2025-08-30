@@ -166,13 +166,10 @@ export const sendConnectionRequest = async (req, res) => {
 			createdAt: { $gte: last24hours },
 		});
 		if (connectionRequests.length >= 20) {
-			return res
-				.status(429)
-				.json({
-					success: false,
-					message:
-						"You have exceeded the connection request limit. Please try again later.",
-				});
+			return res.status(429).json({
+				success: false,
+				message: "You have exceeded the connection request limit. Please try again later.",
+			});
 		}
 
 		// check if users are already connected

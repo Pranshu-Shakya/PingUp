@@ -1,4 +1,6 @@
 import { Inngest } from "inngest";
+// Ensure environment variables are loaded (in case server.js imports this before loading dotenv)
+import "dotenv/config";
 import User from "../models/user.model.js";
 import Connection from "../models/connection.model.js";
 import sendEmail from "../configs/nodemailer.js";
@@ -6,26 +8,19 @@ import Story from "../models/story.model.js";
 import Message from "../models/message.model.js";
 
 // Create a client to send and receive events
-// Ensure INNGEST_EVENT_KEY and INNGEST_SIGNING_KEY are set in your environment for cloud usage.
+// The Event Key is required to send events to Inngest Cloud. A 401 "Event key not found" means it was missing or invalid.
+// Signing key (optional) lets the framework verify calls from Inngest to your function endpoints.
+const { INNGEST_EVENT_KEY, INNGEST_SIGNING_KEY } = process.env;
+if (!INNGEST_EVENT_KEY) {
+	console.warn(
+		"[Inngest] Warning: INNGEST_EVENT_KEY is not set. Event sends will fail with 401."
+	);
+}
 export const inngest = new Inngest({
 	id: "pingup-app",
-	eventKey: process.env.INNGEST_EVENT_KEY, // required to send events to Inngest Cloud
-	signingKey: process.env.INNGEST_SIGNING_KEY, // used to verify function calls
+	eventKey: INNGEST_EVENT_KEY, // used when calling inngest.send
+	signingKey: INNGEST_SIGNING_KEY, // used by serve() to verify requests
 });
-
-if (!process.env.INNGEST_EVENT_KEY) {
-	console.warn("[Inngest] Missing INNGEST_EVENT_KEY; event sending will fail with 401.");
-}
-
-// Optional: centralized safe send wrapper
-export async function sendInngestEvent(name, data) {
-	try {
-		return await inngest.send({ name, data });
-	} catch (err) {
-		console.error(`[Inngest] Failed to send event '${name}':`, err?.response?.data || err.message);
-		throw err;
-	}
-}
 
 //inngest function to save user data to a database
 const syncUserCreation = inngest.createFunction(
@@ -154,20 +149,20 @@ const deleteStory = inngest.createFunction(
 );
 
 const sendNotificationOfUnseenMessages = inngest.createFunction(
-	{id: "send-unseen-messages-notification"},
-	{cron: "TZ=Asia/Kolkata 0 9 * * *"}, // every day at 9 AM IST
-    async ({step}) => {
-        const messages = await Message.find({seen: false}).populate('to_user_id');
-        const unseenCount = {};
+	{ id: "send-unseen-messages-notification" },
+	{ cron: "TZ=Asia/Kolkata 0 9 * * *" }, // every day at 9 AM IST
+	async ({ step }) => {
+		const messages = await Message.find({ seen: false }).populate("to_user_id");
+		const unseenCount = {};
 
-        messages.map(message => {
-            unseenCount[message.to_user_id.id] = (unseenCount[message.to_user_id.id] || 0) + 1;
-        })
+		messages.map((message) => {
+			unseenCount[message.to_user_id.id] = (unseenCount[message.to_user_id.id] || 0) + 1;
+		});
 
-        for(const userId in unseenCount) {
-            const user = await User.findById(userId);
-            const subject = `🔔 You have ${unseenCount[userId]} unseen messages`;
-            const body = `
+		for (const userId in unseenCount) {
+			const user = await User.findById(userId);
+			const subject = `🔔 You have ${unseenCount[userId]} unseen messages`;
+			const body = `
             <div style="font-family: Arial, sans-serif; padding: 20px">
                 <h2>Hi ${user.full_name},</h2>
                 <p>You have ${unseenCount[userId]} unseen messages in your inbox.</p>
@@ -176,15 +171,15 @@ const sendNotificationOfUnseenMessages = inngest.createFunction(
                 <p>Thanks,<br/>PingUp - Stay Connected</p>
             </div>
             `;
-            await sendEmail({
-                to: user.email,
-                subject,
-                body
-            })
-        }
-        return {message: "Notifications sent"}
-    }
-)
+			await sendEmail({
+				to: user.email,
+				subject,
+				body,
+			});
+		}
+		return { message: "Notifications sent" };
+	}
+);
 
 // Create an empty array where we'll export future Inngest functions
 export const functions = [
@@ -193,5 +188,5 @@ export const functions = [
 	syncUserDeletion,
 	sendConnectionRequestReminder,
 	deleteStory,
-    sendNotificationOfUnseenMessages
+	sendNotificationOfUnseenMessages,
 ];

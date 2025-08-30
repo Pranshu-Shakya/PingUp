@@ -33,9 +33,9 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 		setViewStory(null);
 	};
 
-    if (!viewStory) return null;
-	
-    const renderContent = () => {
+	if (!viewStory) return null;
+
+	const renderContent = () => {
 		switch (viewStory.media_type) {
 			case "image":
 				return (
@@ -49,8 +49,8 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 				return (
 					<video
 						onEnded={() => setViewStory(null)}
-                        autoPlay
-                        controls
+						autoPlay
+						controls
 						src={viewStory.media_url}
 						className="max-w-full max-h-screen object-contain"
 					/>
@@ -80,7 +80,8 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 					style={{
 						width: `${progress}%`,
 						// Smooth linear animation for non-video stories
-						transition: viewStory.media_type !== "video" ? "width 10000ms linear" : undefined,
+						transition:
+							viewStory.media_type !== "video" ? "width 10000ms linear" : undefined,
 					}}
 				></div>
 			</div>
@@ -103,8 +104,10 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 			>
 				<X className="w-8 h-8 hover:scale-110 transition cursor-pointer" />
 			</button>
-            {/* content wrapper */}
-            <div className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">{renderContent()}</div>
+			{/* content wrapper */}
+			<div className="max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+				{renderContent()}
+			</div>
 		</div>
 	);
 };

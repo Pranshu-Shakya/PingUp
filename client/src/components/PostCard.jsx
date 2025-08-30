@@ -19,26 +19,30 @@ const PostCard = ({ post }) => {
 	const [likes, setLikes] = React.useState(post.likes_count);
 	const currentUser = useSelector((state) => state.user.value);
 	// console.log(currentUser);
-    
+
 	const handleLike = async () => {
-        try {
-            const {data} = await api.post("/api/post/like", {postId :post._id}, {headers: {Authorization: `Bearer ${await getToken()}`}});
-            if(data.success) {
-                // toast.success(data.message)
-                setLikes(prev => {
-                    if(prev.includes(currentUser._id)) {
-                        return prev.filter(id => id !== currentUser._id);
-                    } else {
-                        return [...prev, currentUser._id];
-                    }
-                })
-            } else {
-                toast.error(data.message)
-            }
-        } catch (error) {
-            toast.error(error.message)
-        }
-    };
+		try {
+			const { data } = await api.post(
+				"/api/post/like",
+				{ postId: post._id },
+				{ headers: { Authorization: `Bearer ${await getToken()}` } }
+			);
+			if (data.success) {
+				// toast.success(data.message)
+				setLikes((prev) => {
+					if (prev.includes(currentUser._id)) {
+						return prev.filter((id) => id !== currentUser._id);
+					} else {
+						return [...prev, currentUser._id];
+					}
+				});
+			} else {
+				toast.error(data.message);
+			}
+		} catch (error) {
+			toast.error(error.message);
+		}
+	};
 	return (
 		<div className="bg-white rounded-xl shadow p-4 space-y-4 w-full max-w-2xl">
 			{/* user info */}

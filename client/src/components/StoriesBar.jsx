@@ -4,21 +4,42 @@ import { Plus } from "lucide-react";
 import moment from "moment";
 import StoryModel from "./StoryModel";
 import StoryViewer from "./StoryViewer";
+import { useAuth } from "@clerk/clerk-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
 
 const StoriesBar = () => {
+	const { getToken } = useAuth();
 	const [stories, setStories] = React.useState([]);
-    const [showModel, setShowModel] = React.useState(false);
-    const [viewStory, setViewStory] = React.useState(null);
+	const [showModel, setShowModel] = React.useState(false);
+	const [viewStory, setViewStory] = React.useState(null);
+
 	const fetchStories = async () => {
-		setStories(dummyStoriesData);
+		try {
+			const token = await getToken();
+			const { data } = await api.get("/api/story/get", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			if (data.success) {
+				setStories(data.stories);
+			} else {
+				toast.error(data.message);
+			}
+		} catch (error) {
+			toast.error(error.message);
+		}
 	};
+
 	React.useEffect(() => {
 		fetchStories();
 	}, []);
 	return (
 		<div className="w-screen sm:w-[calc(100vw-240px)] lg:max-w-2xl no-scrollbar overflow-x-auto px-4">
 			<div className="flex gap-4 pb-5">
-				<div onClick={() => setShowModel(true)} className="rounded-lg shadow-sm min-w-30 max-w-30 max-h-40 aspect-[3/4] cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-50 to-white">
+				<div
+					onClick={() => setShowModel(true)}
+					className="rounded-lg shadow-sm min-w-30 max-w-30 max-h-40 aspect-[3/4] cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-50 to-white"
+				>
 					<div className="h-full flex flex-col items-center justify-center">
 						<div className="size-10 bg-indigo-500 rounded-full flex items-center justify-center mb-3">
 							<Plus className="w-5 h-5 text-white" />
@@ -30,7 +51,7 @@ const StoriesBar = () => {
 				</div>
 				{stories.map((story, index) => (
 					<div
-                        onClick={() => setViewStory(story)}
+						onClick={() => setViewStory(story)}
 						key={index}
 						className={`relative rounded-lg shadow min-w-30 max-h-40 cursor-pointer hover:shadow-lg transition-all duration-200 bg-gradient-to-b from-indigo-500 to-purple-600 hover:from-indigo-700 hover:to-purple-800 active:scale-95`}
 					>
@@ -64,12 +85,8 @@ const StoriesBar = () => {
 					</div>
 				))}
 			</div>
-            {
-                showModel && <StoryModel setShowModel={setShowModel} fetchStories={fetchStories} />
-            }
-            {
-                viewStory && <StoryViewer viewStory={viewStory} setViewStory={setViewStory} /> 
-            }
+			{showModel && <StoryModel setShowModel={setShowModel} fetchStories={fetchStories} />}
+			{viewStory && <StoryViewer viewStory={viewStory} setViewStory={setViewStory} />}
 		</div>
 	);
 };
